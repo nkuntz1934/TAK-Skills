@@ -1,0 +1,13 @@
+{
+  "name": "tak",
+  "owner": {
+    "name": "nkuntz1934"
+  },
+  "plugins": [
+    {
+      "name": "tak",
+      "source": "./",
+      "description": "Skills for the TAK Server platform"
+    }
+  ]
+}

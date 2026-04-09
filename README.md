@@ -6,21 +6,36 @@ A collection of [Agent Skills](https://www.anthropic.com/engineering/equipping-a
 
 ### Claude Code
 
-Install using the plugin marketplace:
+Add as an extra marketplace source, then install the plugin:
 
 ```
-/plugin marketplace add nkuntz1934/tak-skills
+# Add the private marketplace source
+# In settings.json, add to "extraKnownMarketplaces":
+#   "tak": { "source": { "source": "github", "repo": "nkuntz1934/tak-skills" } }
+
+# Then install
 /plugin install tak@tak
 ```
 
+Or install directly from GitHub:
+
+```
+/plugin add github:nkuntz1934/tak-skills
+```
+
+### Cursor
+
+Add via **Settings > Rules > Add Rule > Remote Rule (Github)** with `nkuntz1934/tak-skills`.
+
 ### Clone / Copy
 
-Clone this repo and copy the skill folders into the appropriate directory for your agent:
+Clone this repo and copy the skill and command folders into your agent's config:
 
-| Agent | Skill Directory | Docs |
-|-------|-----------------|------|
-| Claude Code | `~/.claude/skills/` | [docs](https://code.claude.com/docs/en/skills) |
-| Cursor | `~/.cursor/skills/` | [docs](https://cursor.com/docs/context/skills) |
+```bash
+git clone git@github.com:nkuntz1934/tak-skills.git
+cp -r tak-skills/skills/tak-server ~/.claude/skills/
+cp -r tak-skills/commands/* ~/.claude/commands/
+```
 
 ## Commands
 
