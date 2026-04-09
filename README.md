@@ -1,45 +1,63 @@
 # TAK Server Skills
 
+> **Work in Progress** -- This skill is under active development. If you find anything inaccurate, please submit a PR.
+
 A collection of [Agent Skills](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills) for working with TAK Server APIs, including Mission/Data Sync, WebCOP, Federation, Certificate Management, and CoT (Cursor on Target).
 
 ## Installing
 
-### Claude Code
+### Claude Code (recommended)
 
-Add as an extra marketplace source, then install the plugin:
+Add as an extra marketplace source in your `~/.claude/settings.json`:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "tak": {
+      "source": {
+        "source": "github",
+        "repo": "nkuntz1934/tak-skills"
+      }
+    }
+  }
+}
+```
+
+Then install the plugin:
 
 ```
-# Add the private marketplace source
-# In settings.json, add to "extraKnownMarketplaces":
-#   "tak": { "source": { "source": "github", "repo": "nkuntz1934/tak-skills" } }
-
-# Then install
 /plugin install tak@tak
-```
-
-Or install directly from GitHub:
-
-```
-/plugin add github:nkuntz1934/tak-skills
+/reload-plugins
 ```
 
 ### Cursor
 
 Add via **Settings > Rules > Add Rule > Remote Rule (Github)** with `nkuntz1934/tak-skills`.
 
-### Clone / Copy
+### Manual Install (any agent)
 
-Clone this repo and copy the skill and command folders into your agent's config:
+Clone this repo and copy the skill and command folders into your agent's config directory:
 
 ```bash
 git clone git@github.com:nkuntz1934/tak-skills.git
+```
+
+Then copy into the appropriate location:
+
+| Agent | Copy skills to | Copy commands to |
+|-------|---------------|-----------------|
+| Claude Code | `~/.claude/skills/tak-server/` | `~/.claude/commands/` |
+| Cursor | `~/.cursor/skills/tak-server/` | n/a |
+
+Example for Claude Code:
+```bash
 cp -r tak-skills/skills/tak-server ~/.claude/skills/
-cp -r tak-skills/commands/* ~/.claude/commands/
+cp tak-skills/commands/tak_docs.md ~/.claude/commands/
 ```
 
 ## Commands
 
-Commands are user-invocable slash commands that you explicitly call.
+Commands are user-invocable slash commands.
 
 | Command | Description |
 |---------|-------------|
@@ -47,16 +65,30 @@ Commands are user-invocable slash commands that you explicitly call.
 
 ## Skills
 
-Skills are contextual and auto-loaded based on your conversation.
+Skills are contextual and auto-loaded when your conversation matches TAK-related topics.
 
 | Skill | Useful for |
 |-------|------------|
-| tak-server | Comprehensive TAK Server API skill covering Missions, Data Sync, WebCOP, Federation, Certificates, CoT, QoS, Retention, and server configuration |
+| tak-server | Comprehensive TAK Server API skill covering 45+ API groups: Missions, Data Sync, WebCOP, Federation, Certificates, CoT, QoS, Retention, Plugins, Profiles, and server administration |
+
+## What's Included
+
+The skill is organized with progressive disclosure -- a lean overview that points to detailed reference files:
+
+```
+skills/tak-server/
+├── SKILL.md                          # Overview, core concepts, API group index
+└── references/
+    ├── endpoints.md                  # Every endpoint from the OpenAPI spec
+    ├── mission-api.md                # Mission/Data Sync guide with curl examples
+    ├── webcop-api.md                 # WebCOP WebSocket/STOMP messaging
+    └── schemas.md                    # Configuration schemas and data models
+```
 
 ## Source Documentation
 
-The skills in this repo are derived from the official TAK Server API documentation:
+Derived from the official TAK Server API documentation:
 
-- **OpenAPI 3.1.0 Spec** (370 pages) - Full endpoint and schema definitions
-- **TAK Server Mission API Definition** - Data Sync / Mission API guide with examples
-- **TAK Server WebCOP API Definition** - Browser-based WebSocket/STOMP messaging API
+- **OpenAPI 3.1.0 Spec** (370 pages) -- Full endpoint and schema definitions
+- **TAK Server Mission API Definition** -- Data Sync / Mission API guide with examples
+- **TAK Server WebCOP API Definition** -- Browser-based WebSocket/STOMP messaging API

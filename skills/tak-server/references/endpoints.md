@@ -5,13 +5,16 @@ Complete endpoint reference organized by API group. Base URL: `https://<server>:
 ## Table of Contents
 - [mission-api](#mission-api)
 - [cot-api](#cot-api)
+- [cot-query-api](#cot-query-api)
 - [cop-view-api](#cop-view-api)
 - [contacts-api](#contacts-api)
 - [contact-manager-api](#contact-manager-api)
 - [metadata-api](#metadata-api)
 - [file-manager-api](#file-manager-api)
+- [file-configuration-api](#file-configuration-api)
 - [security-authentication-api](#security-authentication-api)
 - [cert-manager-admin-api](#cert-manager-admin-api)
+- [cert-manager-api](#cert-manager-api)
 - [file-user-account-management-api](#file-user-account-management-api)
 - [config-api](#config-api)
 - [submission-api](#submission-api)
@@ -24,15 +27,24 @@ Complete endpoint reference organized by API group. Base URL: `https://<server>:
 - [subscription-api](#subscription-api)
 - [properties-api](#properties-api)
 - [plugin-data-api](#plugin-data-api)
+- [plugin-manager-api](#plugin-manager-api)
 - [qo-s-api](#qo-s-api)
 - [video-connection-manager-v-2](#video-connection-manager-v-2)
 - [iconset-icon-api](#iconset-icon-api)
+- [injection-api](#injection-api)
+- [repeater-api](#repeater-api)
 - [token-api](#token-api)
 - [registration-api](#registration-api)
 - [locate-api](#locate-api)
 - [ci-trap-report-api](#ci-trap-report-api)
 - [vbm-configuration-api](#vbm-configuration-api)
 - [profile-admin-api](#profile-admin-api)
+- [profile-api](#profile-api)
+- [version-api](#version-api)
+- [home-api](#home-api)
+- [groups-api](#groups-api)
+- [uid-search-api](#uid-search-api)
+- [sequence-api](#sequence-api)
 - [xmpp-api](#xmpp-api)
 - [o-auth-api](#o-auth-api)
 
@@ -108,14 +120,20 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 | GET | `/Marti/api/missions/{missionName}/invitations` | getMissionInvitations |
 | PUT | `/Marti/api/missions/{name}/expiration` | setExpiration_1 | query: expiration (int64, optional) |
 
-### Other (by name)
+### External data, feeds, and other (by name)
 
-| Method | Path | Operation |
-|--------|------|-----------|
-| DELETE | `/Marti/api/missions/{name}/externaldata/{id}` | deleteExternalMissionData |
-| DELETE | `/Marti/api/missions/{missionName}/feed/{uid}` | removeFeed |
-| DELETE | `/Marti/api/missions/{missionName}/maplayers/{uid}` | deleteMapLayer |
-| DELETE | `/Marti/api/missions/{childName}/parent` | clearParent |
+| Method | Path | Operation | Notes |
+|--------|------|-----------|-------|
+| POST | `/Marti/api/missions/{name}/externaldata` | setExternalMissionData | query: creatorUid (**required**). Body: ExternalMissionData. Response: 201 ApiResponseExternalMissionData |
+| POST | `/Marti/api/missions/{name}/externaldata/{id}/change` | notifyExternalDataChanged | query: creatorUid, notes. Body: string |
+| DELETE | `/Marti/api/missions/{name}/externaldata/{id}` | deleteExternalMissionData | |
+| POST | `/Marti/api/missions/{name}/feed` | addFeed | query: creatorUid, dataFeedUid, filterPolygon (string[]), filterCotTypes, filterCallsign |
+| DELETE | `/Marti/api/missions/{missionName}/feed/{uid}` | removeFeed | |
+| DELETE | `/Marti/api/missions/{missionName}/maplayers/{uid}` | deleteMapLayer | |
+| DELETE | `/Marti/api/missions/{childName}/parent` | clearParent | |
+| POST | `/Marti/api/missions/{name}/send` | sendMissionArchive | Response: ApiResponseSetMission |
+| POST | `/Marti/api/missions/{name}/invite` | sendMissionInvites | query: creatorUid (optional) |
+| GET | `/Marti/api/missions/{name}/parent` | getParent | Response: ApiResponseMission |
 
 ### Missions by GUID
 
@@ -152,19 +170,29 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 | PUT | `/Marti/api/missions/guid/{childGuid}/parent/guid/{parentGuid}` | setParentByGuid |
 | DELETE | `/Marti/api/missions/guid/{childGuid}/parent` | clearParentByGuid |
 | DELETE | `/Marti/api/missions/guid/{guid}/externaldata/{id}` | deleteExternalDataByGuid |
+| POST | `/Marti/api/missions/guid/{guid}/externaldata` | setExternalMissionDataByGuid | query: creatorUid. Body: ExternalMissionData. Response: 201 |
+| POST | `/Marti/api/missions/guid/{guid}/externaldata/{id}/change` | notifyExternalDataChangedByGuid | query: creatorUid, notes |
+| POST | `/Marti/api/missions/guid/{guid}/send` | sendMissionArchiveByGuid | Response: ApiResponseSetMission |
+| POST | `/Marti/api/missions/guid/{missionGuid}/invite` | sendMissionInvitesByGuid | query: creatorUid (optional) |
+| POST | `/Marti/api/missions/{missionGuid}/feed` | addFeedByGuid | query: creatorUid, dataFeedUid, filterPolygon, filterCotTypes, filterCallsign |
 
 ### Global mission endpoints
 
 | Method | Path | Operation |
 |--------|------|-----------|
+| GET | `/Marti/api/missions` | getAllMissions | query: passwordProtected, defaultRole, tool. Response: ApiResponseListMission |
+| DELETE | `/Marti/api/missions` | deleteMissionByGuid | query: guid (**required**), creatorUid, deepDelete. Response: ApiResponseSetMission |
+| GET | `/Marti/api/pagedmissions` | getPagedMissions | query: passwordProtected, defaultRole, page, pagesize, tool, sort, nameFilter, uidFilter, ascending. Response: ApiResponseListMission |
 | GET | `/Marti/api/missions/all/subscriptions` | getAllMissionSubscriptions |
 | GET | `/Marti/api/missions/all/subscriptions/guid` | getAllSubscriptionsWithGuid |
 | GET | `/Marti/api/missions/all/logs` | getAllLogEntries |
 | GET | `/Marti/api/missions/all/invitations` | getAllMissionInvitations |
 | GET | `/Marti/api/missions/invitations` | getAllInvitationsWithPasswords |
-| GET | `/Marti/api/missioncount` | countAllMissions |
+| GET | `/Marti/api/missioncount` | countAllMissions | query: passwordProtected, defaultRole, tool |
 | GET | `/Marti/api/missions/logs/entries/{id}` | getOneLogEntry |
 | DELETE | `/Marti/api/missions/logs/entries/{id}` | deleteLogEntry |
+| GET | `/Marti/api/sync/search` | searchSync | query: box, circle, startTime, endTime, minAltitude, maxAltitude, filename, keyword[], mimetype, name, uid, hash, mission, tool |
+| GET | `/Marti/api/resources/{hash}` | getResource | Response: ApiResponseListResource |
 
 ---
 
@@ -217,6 +245,9 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 
 | Method | Path | Operation | Notes |
 |--------|------|-----------|-------|
+| GET | `/Marti/api/files/{hash}` | getFile_1 | Response: binary |
+| DELETE | `/Marti/api/files/{hash}` | deleteFile | |
+| HEAD | `/Marti/api/files/{hash}` | getFileHead | Response: ApiResponseMapStringString |
 | PUT | `/Marti/api/files/{hash}/metadata` | putMetadata | params: user, expiration, keywords |
 
 ---
@@ -227,6 +258,8 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 |--------|------|-----------|
 | GET | `/Marti/api/security/config` | getSecConfig |
 | PUT | `/Marti/api/security/config` | modifySecConfig |
+| GET | `/Marti/api/security/verifyConfig` | verifyConfig | Response: ApiResponseString |
+| GET | `/Marti/api/security/isSecure` | isSecure | Response: ApiResponseString |
 | GET | `/Marti/api/authentication/config` | getAuthConfig |
 | PUT | `/Marti/api/authentication/config` | modifyAuthConfig |
 | POST | `/Marti/api/authentication/config` | testAuthConfig |
@@ -261,6 +294,10 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 | POST | `/user-management/api/new-users` | createFileUsersInBulk |
 | POST | `/user-management/api/new-user` | createOrUpdateFileUser |
 | DELETE | `/user-management/api/delete-user/{username}` | deleteUser |
+| GET | `/user-management/api/users-in-group/{group}` | getUsersInGroup | Response: SimpleGroupWithUsersModel |
+| GET | `/user-management/api/list-users` | getAllUsers | Response: UsernameModel[] |
+| GET | `/user-management/api/list-groupnames` | getAllGroupNames | Response: GroupNameModel[] |
+| GET | `/user-management/api/get-groups-for-user/{username}` | getGroupsForUsers | Response: SimpleUserGroupModel |
 
 ---
 
@@ -278,6 +315,8 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 
 | Method | Path | Operation |
 |--------|------|-----------|
+| GET | `/Marti/api/inputs` | getInputMetrics | query: excludeDataFeeds (boolean, default false). Response: ApiResponseSortedSetInputMetric |
+| POST | `/Marti/api/inputs` | createInput | Body: Input. Response: ApiResponseInput |
 | PUT | `/Marti/api/inputs/{id}` | modifyInput |
 | GET | `/Marti/api/inputs/{name}` | getInputMetric |
 | DELETE | `/Marti/api/inputs/{name}` | deleteInput |
@@ -304,6 +343,8 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 | GET | `/Marti/api/retention/missionarchiveconfig` | getMissionArchiveConfig |
 | PUT | `/Marti/api/retention/missionarchiveconfig` | updateMissionArchiveConfig |
 | PUT | `/Marti/api/retention/mission/{name}/expiry/{time}` | scheduleMissionExpiration |
+| POST | `/Marti/api/retention/restoremission` | restoreMissionFromArchive | Body: integer (int32). Response: ApiResponseString |
+| GET | `/Marti/api/retention/missionarchive` | getMissionArchive | Response: ApiResponseString |
 
 ---
 
@@ -311,15 +352,34 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 
 | Method | Path | Operation |
 |--------|------|-----------|
-| GET | `/Marti/api/outgoingconnections` | getOutgoingConnections |
-| PUT | `/Marti/api/outgoingconnections` | updateOutgoingConnection |
-| POST | `/Marti/api/outgoingconnections` | createOutgoingConnection |
-| GET | `/Marti/api/activeconnections` | getActiveConnections |
-| GET | `/Marti/api/clearFederationEvents` | clearDisruptionData |
-| PUT | `/Marti/api/federatemissions/{federateId}` | updateFederateMissions |
-| PUT | `/Marti/api/federatedetails` | updateFederateDetails |
-| DELETE | `/Marti/api/federatedetails/{federateId}` | deleteFederate |
-| DELETE | `/Marti/api/federatecertificates/{fingerprint}` | deleteFederateCertificateCA |
+| GET | `/Marti/api/outgoingconnections` | getOutgoingConnections | Response: ApiResponseSortedSetOutgoingConnectionSummary |
+| PUT | `/Marti/api/outgoingconnections` | updateOutgoingConnection | Body: Map<String, FederationOutgoing> |
+| POST | `/Marti/api/outgoingconnections` | createOutgoingConnection | Body: FederationOutgoing |
+| GET | `/Marti/api/outgoingconnections/{name}` | getOutgoingConnection | Response: ApiResponseFederationOutgoing |
+| DELETE | `/Marti/api/outgoingconnections/{name}` | deleteOutgoingConnection | Response: ApiResponseBoolean |
+| GET | `/Marti/api/outgoingconnectionstatus/{name}` | getConnectionStatus | Response: ApiResponseConnectionStatus |
+| POST | `/Marti/api/outgoingconnectionstatus/{name}` | changeConnectionStatus | query: newStatus (boolean). Response: ApiResponseBoolean |
+| GET | `/Marti/api/activeconnections` | getActiveConnections | Response: ApiResponseListConnectionInfoSummary |
+| GET | `/Marti/api/clearFederationEvents` | clearDisruptionData | |
+| PUT | `/Marti/api/federatemissions/{federateId}` | updateFederateMissions | Body: FederateMissionPerConnectionSettings |
+| PUT | `/Marti/api/federatedetails` | updateFederateDetails | Body: Federate |
+| DELETE | `/Marti/api/federatedetails/{federateId}` | deleteFederate | Response: ApiResponseBoolean |
+| DELETE | `/Marti/api/federatecertificates/{fingerprint}` | deleteFederateCertificateCA | |
+| GET | `/Marti/api/federatecertificates` | getFederateCertificates | Response: ApiResponseListCertificateSummary |
+| POST | `/Marti/api/federatecertificates` | saveFederateCertificateCA | Body: binary file upload |
+| GET | `/Marti/api/federategroupsmap/{federateId}` | getFederateGroupsMap | Response: ApiResponseMapStringString |
+| POST | `/Marti/api/federategroupsmap/{federateId}` | addFederateGroupMap | query: remoteGroup, localGroup |
+| DELETE | `/Marti/api/federategroupsmap/{federateId}` | removeFederateGroupMap | query: remoteGroup, localGroup |
+| POST | `/Marti/api/federategroups` | addFederateGroup | Body: FederateGroupAssociation |
+| POST | `/Marti/api/federategroupconfig` | saveFederateGroupConfiguration | |
+| POST | `/Marti/api/federatecatokenauth` | setFederateCATokenAuth | Body: object |
+| POST | `/Marti/api/federatecahops` | setFederateCAHops | Body: FederateCAHopsAssociation |
+| POST | `/Marti/api/federatecagroups` | addFederateCAGroup | Body: FederateCAGroupAssociation |
+| GET | `/Marti/api/federate-outbound-groups-hop-limit/{federateId}` | getFederateOutboundGroupsHopLimits | Response: ApiResponseListOutboundGroupHopLimit |
+| POST | `/Marti/api/federate-outbound-groups-hop-limit/{federateId}` | addFederateOutboundGroupsHopLimit | Body: object |
+| DELETE | `/Marti/api/federate-outbound-groups-hop-limit/{federateId}` | removeFederateOutboundGroupsHopLimit | query: group |
+| POST | `/Marti/api/generateFederationJwtToken` | generateFederationJwtToken | Body: JwtTokenRequestModel |
+| POST | `/Marti/api/generateAndSaveFederationJwtToken` | generateAndSaveJwtToken | Body: JwtTokenRequestModel |
 
 ---
 
@@ -344,6 +404,10 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 | DELETE | `/Marti/api/excheck/checklist/{checklistUid}/task/{taskUid}` | deleteChecklistTask |
 | PUT | `/Marti/api/excheck/checklist/{checklistUid}/mission/{missionName}` | addMissionReference |
 | DELETE | `/Marti/api/excheck/checklist/{checklistUid}/mission/{missionName}` | removeMissionReference |
+| POST | `/Marti/api/excheck/{templateUid}/start` | startChecklist | query: clientUid, callsign, name, description, startTime, defaultRole (enum) |
+| POST | `/Marti/api/excheck/{checklistUid}/stop` | stopChecklist | query: clientUid |
+| POST | `/Marti/api/excheck/template` | postTemplate | query: clientUid (**required**), callsign, name, description |
+| POST | `/Marti/api/excheck/checklist` | createChecklist | query: clientUid (**required**), defaultRole. Body: string |
 
 ---
 
@@ -363,8 +427,10 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 
 | Method | Path | Operation |
 |--------|------|-----------|
-| PUT | `/Marti/api/datafeeds/predicate` | updatePredicateDataFeed |
-| POST | `/Marti/api/datafeeds/predicate` | createPredicateDataFeed |
+| GET | `/Marti/api/datafeeds` | getDataFeeds | Response: ApiResponseListDataFeed |
+| POST | `/Marti/api/datafeeds` | createDataFeed | Body: DataFeed. Response: ApiResponseDataFeed |
+| PUT | `/Marti/api/datafeeds/predicate` | updatePredicateDataFeed | query: updateGroups (boolean, default false). Body: PredicateDataFeed |
+| POST | `/Marti/api/datafeeds/predicate` | createPredicateDataFeed | Body: PredicateDataFeed |
 | DELETE | `/Marti/api/datafeeds/predicate/{feedGuid}` | deletePredicateDataFeed |
 
 ---
@@ -373,9 +439,12 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 
 | Method | Path | Operation |
 |--------|------|-----------|
-| PUT | `/Marti/api/subscriptions/{clientUid}/filter` | setFilter |
-| DELETE | `/Marti/api/subscriptions/{clientUid}/filter` | deleteFilter |
+| GET | `/Marti/api/subscriptions/all` | getAllSubscriptions | query: sortBy (CALLSIGN/UID), direction (ASCENDING/DESCENDING), page (int32, default -1), limit (int32, default -1). Response: ApiResponseSetSubscriptionInfo |
+| PUT | `/Marti/api/subscriptions/{clientUid}/filter` | setFilter | Body: application/xml Filter |
+| DELETE | `/Marti/api/subscriptions/{clientUid}/filter` | deleteFilter | Response: ApiResponseString |
 | DELETE | `/Marti/api/subscriptions/delete/{uid}` | deleteSubscription |
+| POST | `/Marti/api/subscriptions/incognito/{uid}` | toggleIncognito | Response: string |
+| POST | `/Marti/api/subscriptions/add` | addSubscription | Body: tmpStaticSub. Response: ApiResponseSubscriptionInfo |
 | PUT | `/Marti/api/groups/activebits` | setActiveGroups |
 | PUT | `/Marti/api/groups/active` | setActiveGroups |
 | PUT | `/Marti/api/groups/activeForce` | setActiveGroupsForce |
@@ -387,10 +456,11 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 | Method | Path | Operation |
 |--------|------|-----------|
 | PUT | `/Marti/api/properties/{uid}` | storeProperty |
-| GET | `/Marti/api/properties/{uid}/all` | getAllProperties |
-| GET | `/Marti/api/properties/{uid}/{key}` | getPropertyValues |
-| DELETE | `/Marti/api/properties/{uid}/{key}` | deletePropertyKey |
-| DELETE | `/Marti/api/properties/{uid}/all` | deleteAllProperties |
+| GET | `/Marti/api/properties/{uid}/all` | getAllPropertyForUid | Response: ApiResponseMapStringCollectionString |
+| GET | `/Marti/api/properties/{uid}/{key}` | getPropertyForUid | Response: ApiResponseCollectionString |
+| DELETE | `/Marti/api/properties/{uid}/{key}` | clearProperty |
+| DELETE | `/Marti/api/properties/{uid}/all` | clearAllProperty |
+| GET | `/Marti/api/properties/uids` | getAllPropertyKeys | Response: ApiResponseCollectionString |
 
 ---
 
@@ -410,11 +480,15 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 
 | Method | Path | Operation |
 |--------|------|-----------|
-| PUT | `/Marti/api/qos/read/set` | setRead |
-| PUT | `/Marti/api/qos/read/enable` | enableRead |
-| PUT | `/Marti/api/qos/dos/enable` | enableDOS |
-| PUT | `/Marti/api/qos/delivery/set` | setDelivery |
-| PUT | `/Marti/api/qos/delivery/enable` | enableDelivery |
+| PUT | `/Marti/api/qos/read/set` | setRead | Body: RateLimitRule[] |
+| PUT | `/Marti/api/qos/read/enable` | enableRead | Body: boolean |
+| PUT | `/Marti/api/qos/dos/enable` | enableDOS | Body: boolean |
+| PUT | `/Marti/api/qos/delivery/set` | setDelivery | Body: RateLimitRule[] |
+| PUT | `/Marti/api/qos/delivery/enable` | enableDelivery | Body: boolean |
+| GET | `/Marti/api/qos/ratelimit/read/active` | getActiveReadRateLimit | Response: ApiResponseEntryIntegerInteger |
+| GET | `/Marti/api/qos/ratelimit/dos/active` | getActiveDOSRateLimit | Response: ApiResponseEntryIntegerInteger |
+| GET | `/Marti/api/qos/ratelimit/delivery/active` | getActiveDeliveryRateLimit | Response: ApiResponseEntryIntegerInteger |
+| GET | `/Marti/api/qos/conf` | getQosConf | Response: ApiResponseQos |
 
 ---
 
@@ -422,6 +496,8 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 
 | Method | Path | Operation |
 |--------|------|-----------|
+| GET | `/Marti/api/video` | getVideoCollections | query: protocol (optional). Response: VideoCollections |
+| POST | `/Marti/api/video` | createVideoConnection | query: group (string[]). Body: VideoCollections |
 | GET | `/Marti/api/video/{uid}` | getVideoConnection |
 | PUT | `/Marti/api/video/{uid}` | updateVideoConnection |
 | DELETE | `/Marti/api/video/{uid}` | deleteVideoConnection |
@@ -434,6 +510,7 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 |--------|------|-----------|-------|
 | GET | `/Marti/api/iconurl` | getIconUrl | params: cotType (required), iconsetpath, groupName, role, color, medevac, relative |
 | GET | `/Marti/api/iconseturl/{uid}` | getIconsetUrl | |
+| POST | `/Marti/api/iconset` | postIconsetZip | Body: binary file upload. Response: ApiResponseString |
 
 ---
 
@@ -441,6 +518,7 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 
 | Method | Path | Operation |
 |--------|------|-----------|
+| GET | `/Marti/api/token` | getAll | query: expired (boolean, default false). Response: ApiResponseListTokenResult |
 | DELETE | `/Marti/api/token/{token}` | revokeToken |
 | DELETE | `/Marti/api/token/{tokens}` | revokeTokens |
 
@@ -452,6 +530,8 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 |--------|------|-----------|-------|
 | POST | `/register/user` | signUp | params: emailAddress, token |
 | POST | `/register/admin/invite` | invite | params: emailAddress, group[] |
+| GET | `/register/token/{token}` | confirm | |
+| GET | `/register/admin/users` | getAllUsers_1 | Response: TAKUser[] |
 
 ---
 
@@ -511,7 +591,134 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 
 ## o-auth-api
 
-| Method | Path | Operation |
-|--------|------|-----------|
-| GET | `/logout` | logout |
-| POST | `/logout` | logout |
+| Method | Path | Operation | Notes |
+|--------|------|-----------|-------|
+| GET | `/logout` | logout | |
+| POST | `/logout` | logout | |
+| GET | `/token/access` | getAccessToken | Response: ApiResponseString |
+| GET | `/login/authserver` | getAuthServerName | Response: ApiResponseString |
+| GET | `/login/auth` | handleAuthRequest | |
+| GET | `/login/.well-known/openid-configuration` | getOpenIdConfiguration | Response: OpenIdConfiguration |
+
+---
+
+## file-configuration-api
+
+| Method | Path | Operation | Notes |
+|--------|------|-----------|-------|
+| GET | `/files/api/config` | getFileConfiguration | Response: FileConfigurationModel |
+| POST | `/files/api/config` | setFileConfiguration | Body: FileConfigurationModel |
+
+---
+
+## cert-manager-api
+
+Distinct from cert-manager-admin-api. Handles TLS certificate signing and key store generation.
+
+| Method | Path | Operation | Notes |
+|--------|------|-----------|-------|
+| POST | `/Marti/api/tls/signClient` | signClientCert | query: clientUid, version. Body: string. Response: byte |
+| POST | `/Marti/api/tls/signClient/v2` | signClientCertV2 | query: clientUid, version. Body: string |
+| GET | `/Marti/api/tls/makeClientKeyStore` | makeKeyStore | query: cn, clientUid, password (default "atakatak"). Response: byte |
+| GET | `/Marti/api/tls/config` | getConfig | Response: string |
+
+---
+
+## injection-api
+
+| Method | Path | Operation | Notes |
+|--------|------|-----------|-------|
+| GET | `/Marti/api/injectors/cot/uid/{uid}` | getOneCotInjector | Response: ApiResponseCollectionInjectorConfig |
+| GET | `/Marti/api/injectors/cot/uid` | getAllCotInjectors | Response: ApiResponseSetInjectorConfig |
+| POST | `/Marti/api/injectors/cot/uid` | putCotInjector | Body: InjectorConfig. Response: ApiResponseSetInjectorConfig |
+| DELETE | `/Marti/api/injectors/cot/uid` | deleteInjector | query: uid, toInject. Response: ApiResponseSetInjectorConfig |
+
+---
+
+## repeater-api
+
+| Method | Path | Operation | Notes |
+|--------|------|-----------|-------|
+| GET | `/Marti/api/repeater/period` | getPeriod | Response: ApiResponseInteger |
+| POST | `/Marti/api/repeater/period` | setPeriod | Body: integer (int32) |
+| GET | `/Marti/api/repeater/list` | getList | Response: ApiResponseListRepeatable |
+| GET | `/Marti/api/repeater/remove/{uid}` | remove | Response: ApiResponseBoolean |
+
+---
+
+## plugin-manager-api
+
+| Method | Path | Operation | Notes |
+|--------|------|-----------|-------|
+| GET | `/Marti/api/plugins/info/all` | getAllPluginInfo | Response: ApiResponseCollectionPluginInfo |
+| POST | `/Marti/api/plugins/info/started` | changePluginStartedStatus | query: name, status (boolean). Response: ApiResponseBoolean |
+| POST | `/Marti/api/plugins/info/enabled` | changePluginEnabledSetting | query: name, status (boolean). Response: ApiResponseBoolean |
+| POST | `/Marti/api/plugins/info/archive` | changePluginArchiveSetting | query: name, archiveEnabled (boolean). Response: ApiResponseBoolean |
+| POST | `/Marti/api/plugins/info/all/started` | changeAllPluginStartedStatus | query: status (boolean). Response: ApiResponseBoolean |
+
+---
+
+## cot-query-api
+
+| Method | Path | Operation | Notes |
+|--------|------|-----------|-------|
+| GET | `/Marti/api` | getAllSearches | Response: ApiResponseListCotSearch |
+
+---
+
+## version-api
+
+| Method | Path | Operation | Notes |
+|--------|------|-----------|-------|
+| GET | `/Marti/api/version` | getVersion | Response: string |
+| GET | `/Marti/api/version/info` | getVersionInfo | Response: VersionInfo |
+| GET | `/Marti/api/version/config` | getVersionConfig | Response: ApiResponseServerConfig |
+| GET | `/Marti/api/node/id` | getNodeId | Response: string |
+
+---
+
+## home-api
+
+| Method | Path | Operation | Notes |
+|--------|------|-----------|-------|
+| GET | `/Marti/api/ver` | getVer | Response: string |
+| GET | `/Marti/api/util/user/roles` | getUserRoles | Response: string[] |
+| GET | `/Marti/api/util/isAdmin` | isAdmin | Response: boolean |
+
+---
+
+## groups-api
+
+| Method | Path | Operation | Notes |
+|--------|------|-----------|-------|
+| GET | `/Marti/api/users/{connectionId}` | getUser | Response: ApiResponseUserGroups |
+| GET | `/Marti/api/users/all` | getAllUsers_2 | Response: ApiResponseSortedSetUser |
+
+---
+
+## uid-search-api
+
+| Method | Path | Operation | Notes |
+|--------|------|-----------|-------|
+| GET | `/Marti/api/uidsearch` | getUIDResults | query: startDate (**required**), endDate (**required**). Response: ApiResponseListUIDResult |
+
+---
+
+## sequence-api
+
+| Method | Path | Operation | Notes |
+|--------|------|-----------|-------|
+| GET | `/Marti/api/sync/sequence/{key}` | getNextInSequence | Response: string |
+
+---
+
+## profile-api
+
+Distinct from profile-admin-api. Handles profile retrieval and enrollment.
+
+| Method | Path | Operation | Notes |
+|--------|------|-----------|-------|
+| GET | `/Marti/api/device/profile/{name}/missionpackage` | getProfileMp | Response: byte |
+| HEAD | `/Marti/api/device/profile/{name}/missionpackage` | headProfileMp | |
+| GET | `/Marti/api/tls/profile/tool/{toolName}/file` | tlsGetProfileDirectoryContent | query: relativePath (string[]), clientUid (**required**) |
+| GET | `/Marti/api/tls/profile/enrollment` | getEnrollmentTimeProfiles | query: clientUid (**required**). Response: byte |

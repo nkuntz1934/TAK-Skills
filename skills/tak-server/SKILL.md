@@ -62,10 +62,12 @@ Content is referenced by deterministic hash of binary content. Clients subscribe
 The TAK Server API is organized into these groups:
 
 **Core Data:**
-- **mission-api** -- CRUD for missions, content, subscriptions, invitations, layers, keywords, feeds
+- **mission-api** -- CRUD for missions, content, subscriptions, invitations, layers, keywords, feeds, external data
 - **cot-api** -- Query CoT events by time/bounding box
+- **cot-query-api** -- Saved CoT searches
 - **metadata-api** -- Set metadata, keywords, and expiration on sync resources
-- **file-manager-api** -- File metadata management
+- **file-manager-api** -- File download, delete, metadata, HEAD
+- **file-configuration-api** -- File storage configuration
 
 **Real-time / Browser:**
 - **cop-view-api** -- COP mission listing and hierarchy
@@ -73,32 +75,44 @@ The TAK Server API is organized into these groups:
 - **contact-manager-api** -- Client endpoint discovery
 
 **Administration:**
-- **security-authentication-api** -- Security and auth configuration
+- **security-authentication-api** -- Security and auth configuration, config verification
 - **cert-manager-admin-api** -- Certificate lifecycle (issue, revoke, download, list)
-- **file-user-account-management-api** -- User CRUD, groups, passwords
+- **cert-manager-api** -- TLS certificate signing, key store generation
+- **file-user-account-management-api** -- User CRUD, groups, passwords, user listing
 - **config-api** -- Core server configuration
 - **submission-api** -- Input/output management, data feeds, store-forward chat
-- **retention-api** -- Data retention policies and schedules
+- **retention-api** -- Data retention policies, schedules, mission archive restore
 
 **Collaboration:**
-- **federation-api** -- Inter-server federation connections and config
+- **federation-api** -- Inter-server federation connections, groups, certificates, JWT tokens, hop limits
 - **federation-config-api** -- Federation configuration
-- **ex-check-api** -- Execution checklists with tasks and mission references
+- **ex-check-api** -- Execution checklists with tasks, templates, mission references
 - **map-layers-api** -- Map layer CRUD
-- **data-feed-api** -- Predicate-based data feeds
+- **data-feed-api** -- Data feeds and predicate-based data feeds
+
+**Server Management:**
+- **version-api** -- Server version, config, node ID
+- **home-api** -- User roles, admin check
+- **groups-api** -- User groups lookup
+- **plugin-manager-api** -- Plugin start/stop/enable/archive/listing
+- **injection-api** -- CoT injector configuration CRUD
+- **repeater-api** -- Repeater period and listing
 
 **Other:**
-- **subscription-api** -- Client subscriptions, filters, active groups
+- **subscription-api** -- Client subscriptions, filters, active groups, incognito toggle
 - **properties-api** -- Per-UID key-value storage
 - **plugin-data-api** -- Plugin data submission
-- **qo-s-api** -- Quality of Service rate limiting
-- **video-connection-manager-v-2** -- Video feed connections
-- **iconset-icon-api** -- Icon resolution by CoT type, color, or iconset
-- **token-api** -- Token revocation
-- **registration-api** -- User registration and invites
+- **qo-s-api** -- Quality of Service rate limiting and active limits
+- **video-connection-manager-v-2** -- Video feed connections (single and collection)
+- **iconset-icon-api** -- Icon resolution and iconset upload
+- **token-api** -- Token listing and revocation
+- **registration-api** -- User registration, invites, confirmation
 - **locate-api** -- Geospatial locate queries
-- **ci-trap-report-api** -- CI trap reports
-- **vbm-configuration-api** -- VBM (Virtual Battle Map) config
-- **profile-admin-api** -- Device profile management
+- **ci-trap-report-api** -- CI trap reports and attachments
+- **vbm-configuration-api** -- VBM config and classification
+- **profile-admin-api** -- Device profile management and sending
+- **profile-api** -- Profile retrieval and enrollment
+- **uid-search-api** -- UID search by date range
+- **sequence-api** -- Sequence key generation
 - **xmpp-api** -- XMPP file transfer
-- **o-auth-api** -- OAuth logout
+- **o-auth-api** -- OAuth login, logout, token access, OpenID config
