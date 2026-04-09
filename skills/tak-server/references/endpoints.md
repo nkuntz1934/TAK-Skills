@@ -46,48 +46,48 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 
 | Method | Path | Operation | Notes |
 |--------|------|-----------|-------|
-| GET | `/Marti/api/missions/{name}` | getMission | params: password, changes, logs, secago, start, end, missionGuid |
-| PUT | `/Marti/api/missions/{name}` | createMission | params: creatorUid, group, description, chatRoom, baseLayer, bbox, boundingPolygon, path, classification, tool, password, defaultRole, expiration, inviteOnly, allowGroupChange. Idempotent (201 Created) |
-| POST | `/Marti/api/missions/{name}` | createMissionAllowDupe | Same params as PUT but allows duplicate names |
-| DELETE | `/Marti/api/missions/{name}` | deleteMission | params: creatorUid, deepDelete |
+| GET | `/Marti/api/missions/{name}` | getMission | query: password (string, default ""), changes (boolean, default false), logs (boolean, default false), secago (int64), start (date-time), end (date-time). Response: ApiResponseSetMission |
+| PUT | `/Marti/api/missions/{name}` | createMission | query: creatorUid (string, default ""), group (string[], default ["\_\_ANON\_\_"]), description (string), chatRoom (string), baseLayer (string), bbox (string), boundingPolygon (string[]), path (string), classification (string), tool (string, default "public"), password (string), defaultRole (enum: MISSION_OWNER/MISSION_SUBSCRIBER/MISSION_READONLY_SUBSCRIBER), expiration (int64), inviteOnly (boolean, default false), allowGroupChange (boolean, default false). Body: application/json byte. Idempotent. Response: 200 ApiResponseSetMission |
+| POST | `/Marti/api/missions/{name}` | createMissionAllowDupe | Same params as PUT plus allowDupe (boolean, default false). Body: application/json byte. Response: 200 ApiResponseSetMission |
+| DELETE | `/Marti/api/missions/{name}` | deleteMission | query: creatorUid (string, default ""), deepDelete (boolean, default false). Response: ApiResponseSetMission |
 
 ### Content management (by name)
 
 | Method | Path | Operation | Notes |
 |--------|------|-----------|-------|
-| PUT | `/Marti/api/missions/{name}/contents` | addMissionContent | MissionContent JSON body |
-| DELETE | `/Marti/api/missions/{name}/contents` | removeMissionContent | query: hash or uid |
-| PUT | `/Marti/api/missions/{name}/contents/missionpackage` | addMissionPackage | params: creatorUid, byte body |
-| PUT | `/Marti/api/missions/{name}/content/{hash}/keywords` | addContentKeyword | string array body |
-| DELETE | `/Marti/api/missions/{name}/content/{hash}/keywords` | clearContentKeywords | |
-| PUT | `/Marti/api/missions/{name}/uid/{uid}/keywords` | addUidKeyword | string array body |
-| DELETE | `/Marti/api/missions/{name}/uid/{uid}/keywords` | clearUidKeywords | |
+| PUT | `/Marti/api/missions/{name}/contents` | addMissionContent | query: creatorUid (string, default ""). Body: MissionContent JSON. Response: ApiResponseSetMission |
+| DELETE | `/Marti/api/missions/{name}/contents` | removeMissionContent | query: hash (string), uid (string), creatorUid (string, default ""). Response: ApiResponseSetMission |
+| PUT | `/Marti/api/missions/{name}/contents/missionpackage` | addMissionPackage | query: creatorUid (string, **required**). Body: application/json byte (required). Response: ApiResponseListMissionChange |
+| PUT | `/Marti/api/missions/{name}/content/{hash}/keywords` | addContentKeyword | query: creatorUid (string, default ""). Body: string[] (required) |
+| DELETE | `/Marti/api/missions/{name}/content/{hash}/keywords` | clearContentKeywords | query: creatorUid (string, default "") |
+| PUT | `/Marti/api/missions/{name}/uid/{uid}/keywords` | addUidKeyword | query: creatorUid (string, default ""). Body: string[] (required) |
+| DELETE | `/Marti/api/missions/{name}/uid/{uid}/keywords` | clearUidKeywords | query: creatorUid (string, default "") |
 
 ### Keywords & password (by name)
 
-| Method | Path | Operation |
-|--------|------|-----------|
-| PUT | `/Marti/api/missions/{name}/keywords` | setKeywords |
-| DELETE | `/Marti/api/missions/{name}/keywords/{keyword}` | removeKeyword |
-| PUT | `/Marti/api/missions/{name}/password` | setPassword |
-| DELETE | `/Marti/api/missions/{name}/password` | removePassword |
+| Method | Path | Operation | Notes |
+|--------|------|-----------|-------|
+| PUT | `/Marti/api/missions/{name}/keywords` | setKeywords | query: creatorUid (string, default ""). Body: string[] (required). Response: ApiResponseSetMission |
+| DELETE | `/Marti/api/missions/{name}/keywords` | clearKeywords | query: creatorUid (string, default ""). Response: ApiResponseSetMission |
+| PUT | `/Marti/api/missions/{name}/password` | setPassword | query: password (string, default ""), creatorUid (string, default "") |
+| DELETE | `/Marti/api/missions/{name}/password` | removePassword | query: creatorUid (string, default "") |
 
 ### Invitations (by name)
 
 | Method | Path | Operation | Notes |
 |--------|------|-----------|-------|
-| PUT | `/Marti/api/missions/{name}/invite/{type}/{invitee}` | inviteToMission | type: clientUid, callsign, userName, group, team |
-| DELETE | `/Marti/api/missions/{name}/invite/{type}/{invitee}` | uninviteFromMission | |
+| PUT | `/Marti/api/missions/{name}/invite/{type}/{invitee}` | inviteToMission | type enum: clientUid, callsign, userName, group, team. query: creatorUid (string, **required**), role (enum: MISSION_OWNER/MISSION_SUBSCRIBER/MISSION_READONLY_SUBSCRIBER, optional) |
+| DELETE | `/Marti/api/missions/{name}/invite/{type}/{invitee}` | uninviteFromMission | type enum: clientUid, callsign, userName, group, team. query: creatorUid (string, **required**) |
 
 ### Subscriptions & roles (by name)
 
 | Method | Path | Operation | Notes |
 |--------|------|-----------|-------|
-| GET | `/Marti/api/missions/{missionName}/subscription` | getSubscriptionForUser | |
-| PUT | `/Marti/api/missions/{missionName}/subscription` | createMissionSubscription | params: uid, topic, password, secago, start, end |
-| DELETE | `/Marti/api/missions/{missionName}/subscription` | deleteMissionSubscription | |
-| POST | `/Marti/api/missions/{missionName}/subscription` | setSubscriptionRole | |
-| GET | `/Marti/api/missions/{missionName}/role` | getMissionRoleFromToken | |
+| GET | `/Marti/api/missions/{missionName}/subscription` | getSubscriptionForUser | query: uid (string, default ""). Response: ApiResponseMissionSubscription |
+| PUT | `/Marti/api/missions/{missionName}/subscription` | createMissionSubscription | query: uid (string, default ""), topic (string, default ""), password (string, default ""), secago (int64), start (date-time), end (date-time). Response: **201** ApiResponseMissionSubscription |
+| DELETE | `/Marti/api/missions/{missionName}/subscription` | deleteMissionSubscription | query: uid (string, default ""), topic (string, default ""), disconnectOnly (boolean, default true) |
+| POST | `/Marti/api/missions/{missionName}/subscription` | setSubscriptionRole | query: creatorUid (string, **required**). Body: MissionSubscription[] (required) |
+| GET | `/Marti/api/missions/{missionName}/role` | getMissionRoleFromToken | Response: ApiResponseMissionRole |
 | PUT | `/Marti/api/missions/{missionName}/role` | setMissionRole | |
 | GET | `/Marti/api/missions/{missionName}/subscriptions` | getMissionSubscriptions | |
 | GET | `/Marti/api/missions/{missionName}/subscriptions/roles` | getMissionSubscriptionRoles | |
@@ -106,7 +106,7 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 | GET | `/Marti/api/missions/{missionName}/log` | getLogEntry |
 | GET | `/Marti/api/missions/{missionName}/layers/{layerUid}` | getMissionLayer |
 | GET | `/Marti/api/missions/{missionName}/invitations` | getMissionInvitations |
-| PUT | `/Marti/api/missions/{name}/expiration` | setExpiration |
+| PUT | `/Marti/api/missions/{name}/expiration` | setExpiration_1 | query: expiration (int64, optional) |
 
 ### Other (by name)
 
@@ -465,11 +465,14 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 
 ## ci-trap-report-api
 
-| Method | Path | Operation |
-|--------|------|-----------|
-| GET | `/Marti/api/citrap/{id}` | getReport |
-| PUT | `/Marti/api/citrap/{id}` | putReport |
-| DELETE | `/Marti/api/citrap/{id}` | deleteReport |
+| Method | Path | Operation | Notes |
+|--------|------|-----------|-------|
+| GET | `/Marti/api/citrap` | getReports | params: keywords, bbox, startTime, endTime, maxReportCount, type, callsign, subscribe, clientUid |
+| POST | `/Marti/api/citrap` | postReport | query: clientUid (required). Body: byte |
+| GET | `/Marti/api/citrap/{id}` | getReport | |
+| PUT | `/Marti/api/citrap/{id}` | putReport | |
+| DELETE | `/Marti/api/citrap/{id}` | deleteReport | |
+| POST | `/Marti/api/citrap/{id}/attachment` | addAttachment | query: clientUid. Body: byte |
 
 ---
 
@@ -479,6 +482,7 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 |--------|------|-----------|
 | GET | `/vbm/api/config` | getVBMConfiguration |
 | POST | `/vbm/api/config` | setVBMConfiguration |
+| GET | `/vbm/api/classification` | getVBMNetworkClassification |
 
 ---
 
@@ -491,7 +495,8 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 | POST | `/Marti/api/device/profile/{name}` | createProfile |
 | PUT | `/Marti/api/device/profile/{name}/file` | addFile |
 | PUT | `/Marti/api/device/profile/{name}/directories` | updateDirectories |
-| DELETE | `/Marti/api/device/profile/{id}` | deleteProfile |
+| DELETE | `/Marti/api/device/profile/{id}` | deleteProfile | id is int64 |
+| POST | `/Marti/api/device/profile/{name}/send` | sendProfile | Body: string array |
 
 ---
 
