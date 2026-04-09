@@ -23,11 +23,17 @@ Add as an extra marketplace source in your `~/.claude/settings.json`:
 }
 ```
 
-Then install the plugin:
+Then install the plugin from inside Claude Code:
 
 ```
 /plugin install tak@tak
 /reload-plugins
+```
+
+Alternatively, load the skill directory directly for a single session:
+
+```bash
+claude --plugin-dir /path/to/tak-skills
 ```
 
 ### Cursor

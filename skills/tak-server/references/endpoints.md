@@ -45,6 +45,7 @@ Complete endpoint reference organized by API group. Base URL: `https://<server>:
 - [groups-api](#groups-api)
 - [uid-search-api](#uid-search-api)
 - [sequence-api](#sequence-api)
+- [ldap-api](#ldap-api)
 - [xmpp-api](#xmpp-api)
 - [o-auth-api](#o-auth-api)
 
@@ -249,6 +250,8 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 | DELETE | `/Marti/api/files/{hash}` | deleteFile | |
 | HEAD | `/Marti/api/files/{hash}` | getFileHead | Response: ApiResponseMapStringString |
 | PUT | `/Marti/api/files/{hash}/metadata` | putMetadata | params: user, expiration, keywords |
+| GET | `/Marti/api/files/metadata` | getFileMetadata | query: page (int32, default -1), limit (int32, default -1), mission, missionPackage (boolean), name, sort, ascending (boolean, default true). Response: ApiResponseCollectionMapStringString |
+| GET | `/Marti/api/files/metadata/count` | getFileCount | query: mission, missionPackage (boolean). Response: ApiResponseInteger |
 
 ---
 
@@ -380,6 +383,15 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 | DELETE | `/Marti/api/federate-outbound-groups-hop-limit/{federateId}` | removeFederateOutboundGroupsHopLimit | query: group |
 | POST | `/Marti/api/generateFederationJwtToken` | generateFederationJwtToken | Body: JwtTokenRequestModel |
 | POST | `/Marti/api/generateAndSaveFederationJwtToken` | generateAndSaveJwtToken | Body: JwtTokenRequestModel |
+| GET | `/Marti/api/federates` | getFederates | Response: ApiResponseSortedSetFederate |
+| GET | `/Marti/api/fednum` | getNum | Response: int32 |
+| GET | `/Marti/api/federateremotegroups/{federateId}` | getFederateRemoteGroups | Response: ApiResponseSortedSetRemoteContact |
+| GET | `/Marti/api/federategroups/{federateId}` | getFederateGroups | query: group (**required**), direction (**required**, enum: INBOUND/OUTBOUND/BOTH). Response: ApiResponseListFederateGroupAssociation |
+| DELETE | `/Marti/api/federategroups/{federateId}` | removeFederateGroup | query: group, direction (enum: INBOUND/OUTBOUND/BOTH). Response: ApiResponseString |
+| GET | `/Marti/api/federatedetails/{id}` | getFederateDetails | Response: ApiResponseFederate |
+| GET | `/Marti/api/federatecontacts/{federateId}` | getFederateContacts | Response: ApiResponseSortedSetRemoteContact |
+| GET | `/Marti/api/federatecagroups/{caId}` | getFederateCAGroups | Response: ApiResponseListFederateCAGroupAssociation |
+| DELETE | `/Marti/api/federatecagroups/{caId}` | removeFederateCAGroup | query: group (**required**), direction (enum: INBOUND/OUTBOUND/BOTH) |
 
 ---
 
@@ -389,6 +401,7 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 |--------|------|-----------|
 | GET | `/Marti/api/federationconfig` | getFederationConfig |
 | PUT | `/Marti/api/federationconfig` | modifyFederationConfig |
+| GET | `/Marti/api/federationconfig/verify` | verifyFederationTruststore | Response: ApiResponseBoolean |
 
 ---
 
@@ -404,10 +417,16 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 | DELETE | `/Marti/api/excheck/checklist/{checklistUid}/task/{taskUid}` | deleteChecklistTask |
 | PUT | `/Marti/api/excheck/checklist/{checklistUid}/mission/{missionName}` | addMissionReference |
 | DELETE | `/Marti/api/excheck/checklist/{checklistUid}/mission/{missionName}` | removeMissionReference |
+| GET | `/Marti/api/excheck/template/{templateUid}` | getTemplate | query: clientUid (**required**) |
+| DELETE | `/Marti/api/excheck/template/{templateUid}` | deleteTemplate | query: clientUid (**required**) |
 | POST | `/Marti/api/excheck/{templateUid}/start` | startChecklist | query: clientUid, callsign, name, description, startTime, defaultRole (enum) |
 | POST | `/Marti/api/excheck/{checklistUid}/stop` | stopChecklist | query: clientUid |
 | POST | `/Marti/api/excheck/template` | postTemplate | query: clientUid (**required**), callsign, name, description |
 | POST | `/Marti/api/excheck/checklist` | createChecklist | query: clientUid (**required**), defaultRole. Body: string |
+| GET | `/Marti/api/excheck/checklist/{checklistUid}` | getChecklist | query: clientUid, secago (int64), token |
+| DELETE | `/Marti/api/excheck/checklist/{checklistUid}` | deleteChecklist | query: clientUid (**required**) |
+| GET | `/Marti/api/excheck/checklist/{checklistUid}/status` | getChecklistStatus | query: token, clientUid |
+| GET | `/Marti/api/excheck/checklist/active` | getChecklist_1 | query: clientUid (**required**) |
 
 ---
 
@@ -445,6 +464,7 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 | DELETE | `/Marti/api/subscriptions/delete/{uid}` | deleteSubscription |
 | POST | `/Marti/api/subscriptions/incognito/{uid}` | toggleIncognito | Response: string |
 | POST | `/Marti/api/subscriptions/add` | addSubscription | Body: tmpStaticSub. Response: ApiResponseSubscriptionInfo |
+| GET | `/Marti/api/groups/update/{username}` | groupsUpdated | Response: string |
 | PUT | `/Marti/api/groups/activebits` | setActiveGroups |
 | PUT | `/Marti/api/groups/active` | setActiveGroups |
 | PUT | `/Marti/api/groups/activeForce` | setActiveGroupsForce |
@@ -510,6 +530,10 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 |--------|------|-----------|-------|
 | GET | `/Marti/api/iconurl` | getIconUrl | params: cotType (required), iconsetpath, groupName, role, color, medevac, relative |
 | GET | `/Marti/api/iconseturl/{uid}` | getIconsetUrl | |
+| GET | `/Marti/api/iconset/{uid}` | getAllIconUrlsForIconset | Response: ApiResponseListString |
+| GET | `/Marti/api/iconset/all/uid` | getAllIconsetUids | Response: ApiResponseSetString |
+| GET | `/Marti/api/iconimage` | getIconImage | params: iconsetpath, cotType, medevac, groupName, role, color, relative. Response: byte |
+| GET | `/Marti/api/icon/{uid}/{group}/{name}` | getIcon | Response: byte |
 | POST | `/Marti/api/iconset` | postIconsetZip | Body: binary file upload. Response: ApiResponseString |
 
 ---
@@ -570,13 +594,29 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 
 | Method | Path | Operation |
 |--------|------|-----------|
+| GET | `/Marti/api/device/profile` | getAllProfile | Response: ApiResponseListProfile |
 | GET | `/Marti/api/device/profile/{name}` | getProfile |
 | PUT | `/Marti/api/device/profile/{name}` | updateProfile |
 | POST | `/Marti/api/device/profile/{name}` | createProfile |
 | PUT | `/Marti/api/device/profile/{name}/file` | addFile |
+| GET | `/Marti/api/device/profile/{name}/files` | getFiles | Response: ApiResponseListProfileFile |
+| GET | `/Marti/api/device/profile/{name}/file/{id}` | getFile_2 | id is int64. Response: byte |
+| DELETE | `/Marti/api/device/profile/{name}/file/{id}` | deleteFile_1 | id is int64 |
+| GET | `/Marti/api/device/profile/{name}/directories` | getDirectories | Response: ApiResponseListProfileDirectory |
 | PUT | `/Marti/api/device/profile/{name}/directories` | updateDirectories |
+| DELETE | `/Marti/api/device/profile/{name}/directories` | deleteDirectories |
 | DELETE | `/Marti/api/device/profile/{id}` | deleteProfile | id is int64 |
 | POST | `/Marti/api/device/profile/{name}/send` | sendProfile | Body: string array |
+
+---
+
+## ldap-api
+
+| Method | Path | Operation | Notes |
+|--------|------|-----------|-------|
+| GET | `/Marti/api/ldap` | getLdapGroups | query: groupNameFilter (**required**). Response: ApiResponseSortedSetLdapGroup |
+| GET | `/Marti/api/groups/members` | getLdapGroupMembers | query: groupNameFilter (string[], **required**). Response: ApiResponseInteger |
+| GET | `/Marti/api/groupprefix` | getGroupPrefix | Response: ApiResponseString |
 
 ---
 
@@ -681,6 +721,7 @@ Distinct from cert-manager-admin-api. Handles TLS certificate signing and key st
 
 | Method | Path | Operation | Notes |
 |--------|------|-----------|-------|
+| GET | `/Marti/api/home` | getHome | Response: string |
 | GET | `/Marti/api/ver` | getVer | Response: string |
 | GET | `/Marti/api/util/user/roles` | getUserRoles | Response: string[] |
 | GET | `/Marti/api/util/isAdmin` | isAdmin | Response: boolean |
@@ -693,6 +734,10 @@ Distinct from cert-manager-admin-api. Handles TLS certificate signing and key st
 |--------|------|-----------|-------|
 | GET | `/Marti/api/users/{connectionId}` | getUser | Response: ApiResponseUserGroups |
 | GET | `/Marti/api/users/all` | getAllUsers_2 | Response: ApiResponseSortedSetUser |
+| GET | `/Marti/api/groups/all` | getAllGroups | query: useCache (boolean, default false), sendLatestSA (boolean, default false). Response: ApiResponseCollectionGroup |
+| GET | `/Marti/api/groups/{name}/{direction}` | getGroup | direction enum: IN, OUT. Response: ApiResponseGroup |
+| GET | `/Marti/api/groups/user` | getAllGroupsForUser | query: username (**required**). Response: ApiResponseCollectionGroup |
+| GET | `/Marti/api/groups/groupCacheEnabled` | getGroupCacheEnabled | Response: ApiResponseBoolean |
 
 ---
 
