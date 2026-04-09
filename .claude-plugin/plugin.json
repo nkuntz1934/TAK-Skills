@@ -1,0 +1,8 @@
+{
+  "name": "tak",
+  "description": "Skills for the TAK Server platform: Mission API, Data Sync, WebCOP, Federation, Certificates, and CoT management",
+  "version": "1.0.0",
+  "author": {
+    "name": "nkuntz1934"
+  }
+}
