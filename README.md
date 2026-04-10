@@ -6,59 +6,27 @@ A collection of [Agent Skills](https://www.anthropic.com/engineering/equipping-a
 
 ## Installing
 
-### Claude Code (recommended)
+### Claude Code
 
-Add as an extra marketplace source in your `~/.claude/settings.json`:
-
-```json
-{
-  "extraKnownMarketplaces": {
-    "tak": {
-      "source": {
-        "source": "github",
-        "repo": "nkuntz1934/tak-skills"
-      }
-    }
-  }
-}
-```
-
-Then install the plugin from inside Claude Code:
-
-```
-/plugin install tak@tak
-/reload-plugins
-```
-
-Alternatively, load the skill directory directly for a single session:
-
-```bash
-claude --plugin-dir /path/to/tak-skills
-```
-
-### Cursor
-
-Add via **Settings > Rules > Add Rule > Remote Rule (Github)** with `nkuntz1934/tak-skills`.
-
-### Manual Install (any agent)
-
-Clone this repo and copy the skill and command folders into your agent's config directory:
+Clone this repo and copy the skill and command into your Claude Code config directory:
 
 ```bash
 git clone git@github.com:nkuntz1934/tak-skills.git
-```
-
-Then copy into the appropriate location:
-
-| Agent | Copy skills to | Copy commands to |
-|-------|---------------|-----------------|
-| Claude Code | `~/.claude/skills/tak-server/` | `~/.claude/commands/` |
-| Cursor | `~/.cursor/skills/tak-server/` | n/a |
-
-Example for Claude Code:
-```bash
+mkdir -p ~/.claude/skills
 cp -r tak-skills/skills/tak-server ~/.claude/skills/
 cp tak-skills/commands/tak_docs.md ~/.claude/commands/
+```
+
+The skill will auto-load contextually when working on TAK-related topics. Use `/tak_docs` to load the full API reference on demand.
+
+### Cursor
+
+Clone this repo and copy the skill into your Cursor config directory:
+
+```bash
+git clone git@github.com:nkuntz1934/tak-skills.git
+mkdir -p ~/.cursor/skills
+cp -r tak-skills/skills/tak-server ~/.cursor/skills/
 ```
 
 ## Commands
