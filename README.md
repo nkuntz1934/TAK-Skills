@@ -11,7 +11,7 @@ A collection of [Agent Skills](https://www.anthropic.com/engineering/equipping-a
 Clone this repo and copy the skill and command into your Claude Code config directory:
 
 ```bash
-git clone git@github.com:nkuntz1934/tak-skills.git
+git clone https://github.com/nkuntz1934/tak-skills.git
 mkdir -p ~/.claude/skills
 cp -r tak-skills/skills/tak-server ~/.claude/skills/
 cp tak-skills/commands/tak_docs.md ~/.claude/commands/
@@ -24,7 +24,7 @@ The skill will auto-load contextually when working on TAK-related topics. Use `/
 Clone this repo and copy the skill into your Cursor config directory:
 
 ```bash
-git clone git@github.com:nkuntz1934/tak-skills.git
+git clone https://github.com/nkuntz1934/tak-skills.git
 mkdir -p ~/.cursor/skills
 cp -r tak-skills/skills/tak-server ~/.cursor/skills/
 ```
