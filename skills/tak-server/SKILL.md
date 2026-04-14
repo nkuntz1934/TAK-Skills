@@ -17,6 +17,7 @@ This skill is organized into focused reference files. Read the one that matches 
 | `references/mission-api.md` | Working with missions, data sync, subscriptions, content, or mission packages |
 | `references/webcop-api.md` | Building browser-based SA, WebSocket/STOMP messaging, chat, or COP views |
 | `references/schemas.md` | Configuration schemas, response formats, or data types |
+| `references/connections-auth.md` | Connecting to TAK Server, authentication methods, CoT XML format, certificate management, input configuration |
 
 ## Core Concepts
 

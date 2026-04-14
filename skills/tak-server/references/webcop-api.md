@@ -40,7 +40,7 @@ The 'data' from the response to the 'topic' call is the topic id for your user, 
 
 | Property | Type | Notes |
 |----------|------|-------|
-| command | String | STOMP frame type ("CONNECT", "SEND", etc.) |
+| command | String | STOMP frame type ("CONNECT", "SEND", "MESSAGE", etc.) |
 | headers | JavaScript object | |
 | body | String | |
 

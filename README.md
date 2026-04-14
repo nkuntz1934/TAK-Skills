@@ -12,9 +12,9 @@ Clone this repo and copy the skill and command into your Claude Code config dire
 
 ```bash
 git clone https://github.com/nkuntz1934/TAK-Skills.git
-mkdir -p ~/.claude/skills
-cp -r tak-skills/skills/tak-server ~/.claude/skills/
-cp tak-skills/commands/tak_docs.md ~/.claude/commands/
+mkdir -p ~/.claude/skills ~/.claude/commands
+cp -r TAK-Skills/skills/tak-server ~/.claude/skills/
+cp TAK-Skills/commands/tak_docs.md ~/.claude/commands/
 ```
 
 The skill will auto-load contextually when working on TAK-related topics. Use `/tak_docs` to load the full API reference on demand.
@@ -26,7 +26,7 @@ Clone this repo and copy the skill into your Cursor config directory:
 ```bash
 git clone https://github.com/nkuntz1934/TAK-Skills.git
 mkdir -p ~/.cursor/skills
-cp -r tak-skills/skills/tak-server ~/.cursor/skills/
+cp -r TAK-Skills/skills/tak-server ~/.cursor/skills/
 ```
 
 ## Commands

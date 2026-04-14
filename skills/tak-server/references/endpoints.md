@@ -82,6 +82,7 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 |--------|------|-----------|-------|
 | PUT | `/Marti/api/missions/{name}/keywords` | setKeywords | query: creatorUid (string, default ""). Body: string[] (required). Response: ApiResponseSetMission |
 | DELETE | `/Marti/api/missions/{name}/keywords` | clearKeywords | query: creatorUid (string, default ""). Response: ApiResponseSetMission |
+| DELETE | `/Marti/api/missions/{name}/keywords/{keyword}` | deleteKeyword | Delete specific keyword |
 | PUT | `/Marti/api/missions/{name}/password` | setPassword | query: password (string, default ""), creatorUid (string, default "") |
 | DELETE | `/Marti/api/missions/{name}/password` | removePassword | query: creatorUid (string, default "") |
 
@@ -130,7 +131,16 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 | DELETE | `/Marti/api/missions/{name}/externaldata/{id}` | deleteExternalMissionData | |
 | POST | `/Marti/api/missions/{name}/feed` | addFeed | query: creatorUid, dataFeedUid, filterPolygon (string[]), filterCotTypes, filterCallsign |
 | DELETE | `/Marti/api/missions/{missionName}/feed/{uid}` | removeFeed | |
+| PUT | `/Marti/api/missions/{missionName}/maplayers` | updateMapLayer | Mission-scoped map layer |
+| POST | `/Marti/api/missions/{missionName}/maplayers` | createMapLayer | Mission-scoped map layer |
 | DELETE | `/Marti/api/missions/{missionName}/maplayers/{uid}` | deleteMapLayer | |
+| GET | `/Marti/api/missions/{missionName}/layers` | getLayers | Get layers by mission name |
+| PUT | `/Marti/api/missions/{missionName}/layers` | createLayer | Create layer by mission name |
+| DELETE | `/Marti/api/missions/{missionName}/layers` | deleteLayer | Delete layer by mission name |
+| PUT | `/Marti/api/missions/{missionName}/layers/{layerUid}/name` | setLayerName | |
+| PUT | `/Marti/api/missions/{missionName}/layers/parent` | setLayerParent | |
+| PUT | `/Marti/api/missions/{missionName}/copy` | copyMission | |
+| PUT | `/Marti/api/missions/{childName}/parent/{parentName}` | setParent | |
 | DELETE | `/Marti/api/missions/{childName}/parent` | clearParent | |
 | POST | `/Marti/api/missions/{name}/send` | sendMissionArchive | Response: ApiResponseSetMission |
 | POST | `/Marti/api/missions/{name}/invite` | sendMissionInvites | query: creatorUid (optional) |
@@ -148,7 +158,9 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 | DELETE | `/Marti/api/missions/guid/{guid}/password` | removePasswordByGuid |
 | GET | `/Marti/api/missions/guid/{missionGuid}/subscriptions` | getSubscriptionsByGuid |
 | GET | `/Marti/api/missions/guid/{missionGuid}/subscriptions/roles` | getSubscriptionRolesByGuid |
+| GET | `/Marti/api/missions/guid/{missionGuid}/subscription` | getSubscriptionByGuid |
 | PUT | `/Marti/api/missions/guid/{missionGuid}/subscription` | createSubscriptionByGuid |
+| POST | `/Marti/api/missions/guid/{missionGuid}/subscription` | setSubscriptionRoleByGuid |
 | DELETE | `/Marti/api/missions/guid/{missionGuid}/subscription` | deleteSubscriptionByGuid |
 | GET | `/Marti/api/missions/guid/{missionGuid}/role` | getRoleByGuid |
 | PUT | `/Marti/api/missions/guid/{missionGuid}/role` | setRoleByGuid |
@@ -159,6 +171,7 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 | PUT | `/Marti/api/missions/guid/{missionGuid}/layers` | createLayerByGuid |
 | DELETE | `/Marti/api/missions/guid/{missionGuid}/layers` | deleteLayerByGuid |
 | PUT | `/Marti/api/missions/guid/{missionGuid}/layers/{layerUid}/position` | setLayerPositionByGuid |
+| GET | `/Marti/api/missions/guid/{missionGuid}/layers/{layerUid}` | getLayerByGuid |
 | PUT | `/Marti/api/missions/guid/{missionGuid}/layers/{layerUid}/name` | setLayerNameByGuid |
 | PUT | `/Marti/api/missions/guid/{missionGuid}/layers/parent` | setLayerParentByGuid |
 | PUT | `/Marti/api/missions/guid/{missionGuid}/invite/{type}/{invitee}` | inviteByGuid |
@@ -191,7 +204,10 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 | GET | `/Marti/api/missions/invitations` | getAllInvitationsWithPasswords |
 | GET | `/Marti/api/missioncount` | countAllMissions | query: passwordProtected, defaultRole, tool |
 | GET | `/Marti/api/missions/logs/entries/{id}` | getOneLogEntry |
+| PUT | `/Marti/api/missions/logs/entries` | updateLogEntry | |
+| POST | `/Marti/api/missions/logs/entries` | createLogEntry | |
 | DELETE | `/Marti/api/missions/logs/entries/{id}` | deleteLogEntry |
+| PUT | `/Marti/api/missions/guid/{missionName}/layers/{layerUid}/position` | setLayerPosition | Duplicate of setLayerPositionByGuid with different param name |
 | GET | `/Marti/api/sync/search` | searchSync | query: box, circle, startTime, endTime, minAltitude, maxAltitude, filename, keyword[], mimetype, name, uid, hash, mission, tool |
 | GET | `/Marti/api/resources/{hash}` | getResource | Response: ApiResponseListResource |
 
@@ -201,7 +217,11 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 
 | Method | Path | Operation | Notes |
 |--------|------|-----------|-------|
-| GET | `/Marti/api/cot/matchId` | getCotEventsByTimeAndBbox | query: search |
+| GET | `/Marti/api/cot` | getCotEvents | Main CoT query endpoint |
+| GET | `/Marti/api/cot/xml/{uid}` | getCotEventXml | Get CoT event by UID as XML |
+| GET | `/Marti/api/cot/xml/{uid}/all` | getAllCotEventXml | Get all CoT events for UID |
+| GET | `/Marti/api/cot/sa` | getSACotEvents | Get SA (Situational Awareness) CoT events |
+| GET | `/Marti/api/cot/matchUid` | getCotEventsByMatchUid | query: search |
 
 ---
 
@@ -331,6 +351,7 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 | GET | `/Marti/api/datafeeds/{name}` | getDataFeed |
 | PUT | `/Marti/api/datafeeds/{name}` | modifyDataFeed |
 | DELETE | `/Marti/api/datafeeds/{name}` | deleteDataFeed |
+| GET | `/Marti/api/database/cotCount` | getCotCount | |
 
 ---
 
@@ -338,8 +359,8 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 
 | Method | Path | Operation |
 |--------|------|-----------|
-| GET | `/Marti/api/retention/service/schedule` | getRetentionServiceSchedule |
-| PUT | `/Marti/api/retention/service/schedule` | setRetentionServiceSchedule |
+| GET | `/Marti/api/retention/service` | getRetentionServiceSchedule |
+| PUT | `/Marti/api/retention/service` | setRetentionServiceSchedule |
 | PUT | `/Marti/api/retention/resource/{name}/expiry/{time}` | scheduleResourceExpiration |
 | GET | `/Marti/api/retention/policy` | getRetentionPolicy |
 | PUT | `/Marti/api/retention/policy` | updateRetentionPolicy |
@@ -451,6 +472,13 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 | PUT | `/Marti/api/datafeeds/predicate` | updatePredicateDataFeed | query: updateGroups (boolean, default false). Body: PredicateDataFeed |
 | POST | `/Marti/api/datafeeds/predicate` | createPredicateDataFeed | Body: PredicateDataFeed |
 | DELETE | `/Marti/api/datafeeds/predicate/{feedGuid}` | deletePredicateDataFeed |
+| GET | `/Marti/api/datafeeds/{uuid}/cots_types` | getDataFeedCotTypes | |
+| GET | `/Marti/api/datafeeds/{uuid}/cots/{cot_type}` | getDataFeedCotsByType | |
+| GET | `/Marti/api/datafeeds/stats` | getDataFeedStats | |
+| GET | `/Marti/api/datafeeds/stats/{uuid}` | getDataFeedStatsById | |
+| GET | `/Marti/api/datafeeds/predicate/{feedUuid}` | getPredicateDataFeed | |
+| GET | `/Marti/api/datafeeds/bounds/{bbox}` | getDataFeedsByBbox | |
+| GET | `/Marti/api/datafeeds/bounds/polygon` | getDataFeedsByPolygon | |
 
 ---
 
@@ -476,10 +504,10 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 | Method | Path | Operation |
 |--------|------|-----------|
 | PUT | `/Marti/api/properties/{uid}` | storeProperty |
-| GET | `/Marti/api/properties/{uid}/all` | getAllPropertyForUid | Response: ApiResponseMapStringCollectionString |
+| GET | `/Marti/api/properties/{uid}` | getAllPropertyForUid | Response: ApiResponseMapStringCollectionString |
 | GET | `/Marti/api/properties/{uid}/{key}` | getPropertyForUid | Response: ApiResponseCollectionString |
+| DELETE | `/Marti/api/properties/{uid}` | clearAllProperty |
 | DELETE | `/Marti/api/properties/{uid}/{key}` | clearProperty |
-| DELETE | `/Marti/api/properties/{uid}/all` | clearAllProperty |
 | GET | `/Marti/api/properties/uids` | getAllPropertyKeys | Response: ApiResponseCollectionString |
 
 ---
@@ -604,6 +632,8 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 | DELETE | `/Marti/api/device/profile/{name}/file/{id}` | deleteFile_1 | id is int64 |
 | GET | `/Marti/api/device/profile/{name}/directories` | getDirectories | Response: ApiResponseListProfileDirectory |
 | PUT | `/Marti/api/device/profile/{name}/directories` | updateDirectories |
+| PUT | `/Marti/api/device/profile/{name}/{directories}` | updateDirectories | Path-parameterized variant |
+| GET | `/Marti/api/device/profile/directories` | getAllDirectories | |
 | DELETE | `/Marti/api/device/profile/{name}/directories` | deleteDirectories |
 | DELETE | `/Marti/api/device/profile/{id}` | deleteProfile | id is int64 |
 | POST | `/Marti/api/device/profile/{name}/send` | sendProfile | Body: string array |
@@ -617,6 +647,7 @@ The largest API group -- covers mission CRUD, content management, subscriptions,
 | GET | `/Marti/api/ldap` | getLdapGroups | query: groupNameFilter (**required**). Response: ApiResponseSortedSetLdapGroup |
 | GET | `/Marti/api/groups/members` | getLdapGroupMembers | query: groupNameFilter (string[], **required**). Response: ApiResponseInteger |
 | GET | `/Marti/api/groupprefix` | getGroupPrefix | Response: ApiResponseString |
+| GET | `/Marti/api/groups/home` | getLdapHome | |
 
 ---
 
@@ -702,7 +733,9 @@ Distinct from cert-manager-admin-api. Handles TLS certificate signing and key st
 
 | Method | Path | Operation | Notes |
 |--------|------|-----------|-------|
-| GET | `/Marti/api` | getAllSearches | Response: ApiResponseListCotSearch |
+| GET | `/Marti/api` | getApiInfo | Response: ApiResponseListCotSearch |
+| GET | `/Marti/api/cot/search/{id}` | getCotSearch | Saved CoT search by ID |
+| GET | `/Marti/api/cot/search/date` | getCotSearchByDate | Search CoT events by date range |
 
 ---
 
@@ -763,7 +796,10 @@ Distinct from profile-admin-api. Handles profile retrieval and enrollment.
 
 | Method | Path | Operation | Notes |
 |--------|------|-----------|-------|
-| GET | `/Marti/api/device/profile/{name}/missionpackage` | getProfileMp | Response: byte |
-| HEAD | `/Marti/api/device/profile/{name}/missionpackage` | headProfileMp | |
+| GET | `/Marti/api/device/profile/{name}/missionpackage` | getProfileMissionPackage | Response: byte |
+| HEAD | `/Marti/api/device/profile/{name}/missionpackage` | getProfileMissionPackage | HEAD check |
+| GET | `/Marti/api/device/profile/tool/{toolName}` | getProfileByTool | |
+| GET | `/Marti/api/device/profile/tool/{toolName}/file` | getProfileFileByTool | |
+| GET | `/Marti/api/device/profile/connection` | getProfileConnection | |
 | GET | `/Marti/api/tls/profile/tool/{toolName}/file` | tlsGetProfileDirectoryContent | query: relativePath (string[]), clientUid (**required**) |
 | GET | `/Marti/api/tls/profile/enrollment` | getEnrollmentTimeProfiles | query: clientUid (**required**). Response: byte |
